@@ -1,0 +1,39 @@
+{
+	"name": "sqf-arma3-formatter",
+	"publisher": "th3-sh0w3r",
+	"repository": {
+		"url": "https://github.com/th3-sh0w3r/VSCode-SQF-Formatter"
+	},
+	"displayName": "SQF Formatter (Arma3)",
+	"description": "Formatter for SQF files",
+	"keywords": [
+		"SQF",
+		"Arma",
+		"Arma 3"
+	],
+	"icon": "logo.png",
+	"version": "1.0.0",
+	"engines": {
+		"vscode": "^1.52.0"
+	},
+	"categories": [
+		"Formatters"
+	],
+	"activationEvents": [
+		"onLanguage:sqf"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"languages": [
+			{
+				"id": "sqf",
+				"extensions": [
+					".sqf"
+				],
+				"aliases": [
+					"SQF"
+				]
+			}
+		]
+	}
+}
