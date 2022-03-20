@@ -35,7 +35,7 @@ function setIndents(text) {
     var level = 0;
     var emptylineCount = 0;
     var deleteNextEmptyLine = false;
-    var commentBegins = false;
+    var comment = false;
 
     return text.split('\n')
         .map((line) => {
@@ -55,25 +55,28 @@ function setIndents(text) {
 
             deleteNextEmptyLine = false;
 
-            let prefix = makePrefix(level);
             if (line.split("//").length > 1) {
-                return undefined;
+                return line;
             }
 
             if (line.split("/*").length > 1) {
-                commentBegins = true;
-                return undefined;
+                comment = true;
+                return line;
             }
 
             if (line.split("*/").length > 1) {
-                commentBegins = false;
-                return undefined;
+                comment = false;
+                return line;
             }
 
-            if (commentBegins) {
-                return undefined;
+            if (comment) {
+                return line;
             }
 
+            // Remove multiple spaces
+            line = line.replace(/\s\s+/g, ' ');
+
+            let prefix = makePrefix(level);
             const openBrackets = line.split('[');
             const closeBrackets = line.split(']');
             const openBraces = line.split('{');
@@ -84,17 +87,17 @@ function setIndents(text) {
             const closeBraceCount = closeBraces.length;
             const isOpenBlock = openBrackets[0].split(']').length > 1
                 || openBraces[0].split('}').length > 1;
+
             if (openBracketCount > closeBracketCount || openBraceCount > closeBraceCount) {
                 level++;
                 deleteNextEmptyLine = true;
-            }
-            else if (openBracketCount < closeBracketCount || openBraceCount < closeBraceCount) {
+            } else if (openBracketCount < closeBracketCount || openBraceCount < closeBraceCount) {
                 level = Math.max(0, level - 1);
                 prefix = makePrefix(level);
-            }
-            else if (isOpenBlock) {
+            } else if (isOpenBlock) {
                 prefix = makePrefix(level - 1);
             }
+
             return prefix + line;
         })
         .filter(line => (line !== undefined))
@@ -127,8 +130,6 @@ function pretty(document, range) {
     output = normalizeCommas(output);
     // Normalize IF and WHILE
     output = normalizeCommandStructure(output);
-    // Remove multiple spaces
-    output = output.replace(/\s\s+/g, ' ');
     // Add new line after every semicolon
     output = output.replace(/; *([^\n]+)/g, ';\n$1');
     // Remove any whitespaces before semicolon
