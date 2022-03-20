@@ -21,7 +21,7 @@ function normalizeCommandStructure(text) {
     return text
         .replace(/if\s*\((.*)\)\s*then\s*{/g, 'if ($1) then {')
         .replace(/}\s*else\s*{/g, '} else {')
-        .replace(/if\s*\((.*)\)\s*exitwith\s*{/g, 'if ($1) exitwith {')
+        .replace(/if\s*\((.*)\)\s*exitwith\s*{/g, 'if ($1) exitWith {')
         .replace(/while\s*\{\s*(.*[^\s]*)\s*\}\s*do\s*{/g, 'while { $1 } do {');
 }
 
@@ -35,20 +35,51 @@ function setIndents(text) {
     var level = 0;
     var emptylineCount = 0;
     var deleteNextEmptyLine = false;
+    var commentBegins = false;
+    var commentBeginsOneLine = false;
+    var commentEnds = false;
+
     return text.split('\n')
         .map((line) => {
             // Limit empty lines
             if (line === '') {
-                if (deleteNextEmptyLine)
+                if (deleteNextEmptyLine) {
                     return undefined;
+                }
                 emptylineCount++;
-                if (emptylineCount > 1)
+
+                if (emptylineCount > 1) {
                     return undefined;
-            }
-            else
+                }
+            } else {
                 emptylineCount = 0;
+            }
+
             deleteNextEmptyLine = false;
+            commentBeginsOneLine = false;
+            commentEnds = false;
+
             let prefix = makePrefix(level);
+            const commentStart = line.split("//");
+            const commentStartMultiple = line.split("/*");
+            const commentEnd = line.split("*/");
+
+            if (commentStart.length > 1) {
+                commentBeginsOneLine = true;
+            }
+
+            if (commentStartMultiple.length > 1) {
+                commentBegins = true;
+            }
+
+            if (commentEnd.length > 1) {
+                commentEnds = true;
+            }
+
+            if (commentBegins || commentEnds || commentBeginsOneLine) {
+                return undefined;
+            }
+
             const openBrackets = line.split('[');
             const closeBrackets = line.split(']');
             const openBraces = line.split('{');
@@ -78,7 +109,7 @@ function setIndents(text) {
 }
 
 function normalizeCommandOrFunction(commandOrFunction, output) {
-    return output.replace(new RegExp("((?!\'|\"[\w\s]*)" + commandOrFunction + "(?![\w\s]*\'|\"))", 'gi'), commandOrFunction);
+    return output.replace(new RegExp("((?!\'|\"[\w\s]*)\\b" + commandOrFunction + "\\b(?![\w\s]*\'|\"))", 'gi'), commandOrFunction);
 }
 
 function pretty(document, range) {
@@ -103,7 +134,7 @@ function pretty(document, range) {
     // Normalize IF and WHILE
     output = normalizeCommandStructure(output);
     // Remove multiple spaces
-    output = output.replace(/ {2,}/g, ' ');
+    output = output.replace(/\s\s+/g, ' ');
     // Add new line after every semicolon
     output = output.replace(/; *([^\n]+)/g, ';\n$1');
     // Remove any whitespaces before semicolon
