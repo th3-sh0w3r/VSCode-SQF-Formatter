@@ -36,8 +36,6 @@ function setIndents(text) {
     var emptylineCount = 0;
     var deleteNextEmptyLine = false;
     var commentBegins = false;
-    var commentBeginsOneLine = false;
-    var commentEnds = false;
 
     return text.split('\n')
         .map((line) => {
@@ -56,27 +54,23 @@ function setIndents(text) {
             }
 
             deleteNextEmptyLine = false;
-            commentBeginsOneLine = false;
-            commentEnds = false;
 
             let prefix = makePrefix(level);
-            const commentStart = line.split("//");
-            const commentStartMultiple = line.split("/*");
-            const commentEnd = line.split("*/");
-
-            if (commentStart.length > 1) {
-                commentBeginsOneLine = true;
+            if (line.split("//").length > 1) {
+                return undefined;
             }
 
-            if (commentStartMultiple.length > 1) {
+            if (line.split("/*").length > 1) {
                 commentBegins = true;
+                return undefined;
             }
 
-            if (commentEnd.length > 1) {
-                commentEnds = true;
+            if (line.split("*/").length > 1) {
+                commentBegins = false;
+                return undefined;
             }
 
-            if (commentBegins || commentEnds || commentBeginsOneLine) {
+            if (commentBegins) {
                 return undefined;
             }
 
