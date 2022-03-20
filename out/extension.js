@@ -7,7 +7,7 @@ const commands = require('./commands');
 const functions = require('./functions');
 
 function makePrefix(level) {
-    return '    '.repeat(Math.max(0, level));
+    return '\t'.repeat(Math.max(0, level));
 }
 
 function normalizeBrackets(text) {
@@ -39,22 +39,6 @@ function setIndents(text) {
 
     return text.split('\n')
         .map((line) => {
-            // Limit empty lines
-            if (line === '') {
-                if (deleteNextEmptyLine) {
-                    return undefined;
-                }
-                emptylineCount++;
-
-                if (emptylineCount > 1) {
-                    return undefined;
-                }
-            } else {
-                emptylineCount = 0;
-            }
-
-            deleteNextEmptyLine = false;
-
             if (line.split("//").length > 1) {
                 return line;
             }
@@ -72,6 +56,22 @@ function setIndents(text) {
             if (comment) {
                 return line;
             }
+
+            // Limit empty lines
+            if (line === '') {
+                if (deleteNextEmptyLine) {
+                    return undefined;
+                }
+                emptylineCount++;
+
+                if (emptylineCount > 1) {
+                    return undefined;
+                }
+            } else {
+                emptylineCount = 0;
+            }
+
+            deleteNextEmptyLine = false;
 
             // Remove multiple spaces
             line = line.replace(/\s\s+/g, ' ');
