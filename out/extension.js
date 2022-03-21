@@ -67,6 +67,8 @@ function setIndents(text) {
                 if (emptylineCount > 1) {
                     return undefined;
                 }
+
+                return line;
             } else {
                 emptylineCount = 0;
             }
@@ -105,17 +107,45 @@ function setIndents(text) {
         .trim();
 }
 
+function removeWhitespaces(text) {
+    var comment = false;
+
+    return text.split('\n')
+        .map((line) => {
+            if (line.split("//").length > 1) {
+                line = line.replace(new RegExp("([^/\s]|^)//(?! )", "gi"), "// ");
+                return line;
+            }
+
+            if (line.split("/*").length > 1) {
+                comment = true;
+                return line;
+            }
+
+            if (line.split("*/").length > 1) {
+                comment = false;
+                return line;
+            }
+
+            if (comment) {
+                return line;
+            }
+
+            return line.trim();
+        })
+        .join('\n')
+        .trim();
+}
+
 function normalizeCommandOrFunction(commandOrFunction, output) {
-    return output.replace(new RegExp("((?!\'|\"[\w\s]*)\\b" + commandOrFunction + "\\b(?![\w\s]*\'|\"))", 'gi'), commandOrFunction);
+    return output.replace(new RegExp(`(?!(\\'|\\").*)\\b` + commandOrFunction + `\\b(?!.*(\\'|\\"))`, 'gi'), commandOrFunction);
 }
 
 function pretty(document, range) {
     const result = [];
     let output = document.getText(range);
     // Remove leading and tailing whitespaces
-    output = output.split('\n')
-        .map(line => line.trim())
-        .join('\n');
+    output = removeWhitespaces(output);
     // Normalize brackets
     output = normalizeBrackets(output);
     // Normalize commands
@@ -160,6 +190,7 @@ function activate() {
             return pretty(document, selectionRange);
         }
     });
+
     vscode.languages.registerDocumentFormattingEditProvider({
         scheme: 'file',
         language: 'sqf'
