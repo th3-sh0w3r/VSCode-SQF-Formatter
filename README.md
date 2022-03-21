@@ -10,3 +10,6 @@ This extension is based on Smith's [extension](https://marketplace.visualstudio.
 - Select code, click the `RMB` and select **Format Selection** or press `Ctrl + K` and `Ctrl + F`
 
 *Hotkeys may be different depending on your settings*
+
+## Known bugs
+- (not really a bug) Function names & commands are not checked and replaced inside strings ("String" & 'String').
