@@ -39,22 +39,24 @@ function setIndents(text) {
 
     return text.split('\n')
         .map((line) => {
+            let prefix = makePrefix(level);
+
             if (line.split("//").length > 1) {
-                return line;
+                return prefix + line;
             }
 
             if (line.split("/*").length > 1) {
                 comment = true;
-                return line;
+                return prefix + line;
             }
 
             if (line.split("*/").length > 1) {
                 comment = false;
-                return line;
+                return prefix + line;
             }
 
             if (comment) {
-                return line;
+                return prefix + line;
             }
 
             // Limit empty lines
@@ -78,7 +80,6 @@ function setIndents(text) {
             // Remove multiple spaces
             line = line.replace(/\s\s+/g, ' ');
 
-            let prefix = makePrefix(level);
             const openBrackets = line.split('[');
             const closeBrackets = line.split(']');
             const openBraces = line.split('{');
@@ -117,6 +118,11 @@ function removeWhitespaces(text) {
                 return line;
             }
 
+            var insideComment = false;
+            if (comment) {
+                insideComment = true;
+            }
+
             if (line.split("/*").length > 1) {
                 comment = true;
                 return line;
@@ -124,7 +130,12 @@ function removeWhitespaces(text) {
 
             if (line.split("*/").length > 1) {
                 comment = false;
+                insideComment = false;
                 return line;
+            }
+
+            if (insideComment) {
+                return "\t" + line.trim();
             }
 
             if (comment) {
