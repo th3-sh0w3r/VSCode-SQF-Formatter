@@ -21,7 +21,7 @@ function normalizeCommandStructure(text) {
     return text
         .replace(/if\s*\((.*)\)\s*then\s*{/g, 'if ($1) then {')
         .replace(/}\s*else\s*{/g, '} else {')
-        .replace(/if\s*\((.*)\)\s*exitwith\s*{/g, 'if ($1) exitWith {')
+        .replace(/if\s*\((.*)\)\s*exitWith\s*{/g, 'if ($1) exitWith {')
         .replace(/while\s*\{\s*(.*[^\s]*)\s*\}\s*do\s*{/g, 'while { $1 } do {');
 }
 
@@ -40,45 +40,6 @@ function setIndents(text) {
     return text.split('\n')
         .map((line) => {
             let prefix = makePrefix(level);
-
-            if (line.split("//").length > 1) {
-                return prefix + line;
-            }
-
-            if (line.split("/*").length > 1) {
-                comment = true;
-                return prefix + line;
-            }
-
-            if (line.split("*/").length > 1) {
-                comment = false;
-                return prefix + line;
-            }
-
-            if (comment) {
-                return prefix + line;
-            }
-
-            // Limit empty lines
-            if (line === '') {
-                if (deleteNextEmptyLine) {
-                    return undefined;
-                }
-                emptylineCount++;
-
-                if (emptylineCount > 1) {
-                    return undefined;
-                }
-
-                return line;
-            } else {
-                emptylineCount = 0;
-            }
-
-            deleteNextEmptyLine = false;
-
-            // Remove multiple spaces
-            line = line.replace(/\s\s+/g, ' ');
 
             const openBrackets = line.split('[');
             const closeBrackets = line.split(']');
@@ -101,6 +62,46 @@ function setIndents(text) {
                 prefix = makePrefix(level - 1);
             }
 
+            var commentLine = prefix + line.replace("\t", "");
+
+            if (line.split("//").length > 1) {
+                return commentLine;
+            }
+
+            if (line.split("/*").length > 1) {
+                comment = true;
+                return commentLine;
+            }
+
+            if (line.split("*/").length > 1) {
+                comment = false;
+                return commentLine;
+            }
+
+            if (comment) {
+                return commentLine;
+            }
+
+            // Limit empty lines
+            if (line === '') {
+                if (deleteNextEmptyLine) {
+                    return undefined;
+                }
+                emptylineCount++;
+
+                if (emptylineCount > 1) {
+                    return undefined;
+                }
+
+                return line;
+            } else {
+                emptylineCount = 0;
+            }
+
+            deleteNextEmptyLine = false;
+
+            // Remove multiple spaces
+            line = line.replace(/\s\s+/g, ' ');
             return prefix + line;
         })
         .filter(line => (line !== undefined))
