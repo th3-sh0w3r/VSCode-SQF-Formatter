@@ -1,5 +1,11 @@
-# Version 1.3.3
+# Version 1.3.5
+- Fixed empty lines
+
+# Version 1.3.4
 - Fixed indented comment indent
+
+# Version 1.3.3
+- Fixed exitWith structure replacement & comment indent
 
 # Version 1.3.2
 - Fixed exitWith structure replacement

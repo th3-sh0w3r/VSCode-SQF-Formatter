@@ -41,6 +41,10 @@ function setIndents(text) {
         .map((line) => {
             let prefix = makePrefix(level);
 
+            const singleCommentCount = line.split("//").length;
+            const startMultiCommentCount = line.split("/*").length;
+            const endMultiCommentCount = line.split("*/").length;
+            const isComment = comment || singleCommentCount > 1 || startMultiCommentCount > 1 || endMultiCommentCount > 1;
             const openBrackets = line.split('[');
             const closeBrackets = line.split(']');
             const openBraces = line.split('{');
@@ -62,27 +66,8 @@ function setIndents(text) {
                 prefix = makePrefix(level - 1);
             }
 
-            var commentLine = prefix + line.replace(/\t/g, "");
-            if (line.split("//").length > 1) {
-                return commentLine;
-            }
-
-            if (line.split("/*").length > 1) {
-                comment = true;
-                return commentLine;
-            }
-
-            if (line.split("*/").length > 1) {
-                comment = false;
-                return commentLine;
-            }
-
-            if (comment) {
-                return commentLine;
-            }
-
             // Limit empty lines
-            if (line === '') {
+            if (line === '' && !isComment) {
                 if (deleteNextEmptyLine) {
                     return undefined;
                 }
@@ -98,6 +83,29 @@ function setIndents(text) {
             }
 
             deleteNextEmptyLine = false;
+
+            var commentLine =
+                line.startsWith(prefix) ?
+                    line :
+                    (prefix + line);
+
+            if (singleCommentCount > 1) {
+                return commentLine;
+            }
+
+            if (startMultiCommentCount > 1) {
+                comment = true;
+                return commentLine;
+            }
+
+            if (endMultiCommentCount > 1) {
+                comment = false;
+                return commentLine;
+            }
+
+            if (comment) {
+                return commentLine;
+            }
 
             // Remove multiple spaces
             line = line.replace(/\s\s+/g, ' ');
