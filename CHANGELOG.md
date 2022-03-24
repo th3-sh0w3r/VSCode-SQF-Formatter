@@ -1,3 +1,6 @@
+# Version 1.3.6
+- Fixed empty lines after comment & indent inside comments
+
 # Version 1.3.5
 - Fixed empty lines
 

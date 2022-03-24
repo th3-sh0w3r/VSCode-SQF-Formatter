@@ -84,10 +84,12 @@ function setIndents(text) {
 
             deleteNextEmptyLine = false;
 
-            var commentLine =
-                line.startsWith(prefix) ?
-                    line :
-                    (prefix + line);
+            var insideComment = false;
+            var commentLine = prefix + line.replace(/\t/g, "");
+
+            if (comment) {
+                insideComment = true;
+            }
 
             if (singleCommentCount > 1) {
                 return commentLine;
@@ -100,7 +102,12 @@ function setIndents(text) {
 
             if (endMultiCommentCount > 1) {
                 comment = false;
+                insideComment = false;
                 return commentLine;
+            }
+
+            if (insideComment) {
+                return "\t" + commentLine;
             }
 
             if (comment) {
@@ -126,9 +133,33 @@ function removeWhitespaces(text) {
                 return line;
             }
 
-            var insideComment = false;
+            if (line.split("/*").length > 1) {
+                comment = true;
+                return line;
+            }
+
+            if (line.split("*/").length > 1) {
+                comment = false;
+                return line;
+            }
+
             if (comment) {
-                insideComment = true;
+                return line;
+            }
+
+            return line.trim();
+        })
+        .join('\n')
+        .trim();
+}
+
+function addLineAfterSemicolon(text) {
+    var comment = false;
+
+    return text.split('\n')
+        .map((line) => {
+            if (line.split("//").length > 1) {
+                return line;
             }
 
             if (line.split("/*").length > 1) {
@@ -138,19 +169,14 @@ function removeWhitespaces(text) {
 
             if (line.split("*/").length > 1) {
                 comment = false;
-                insideComment = false;
                 return line;
-            }
-
-            if (insideComment) {
-                return "\t" + line.trim();
             }
 
             if (comment) {
                 return line;
             }
 
-            return line.trim();
+            return line.replace(/; *([^\n]+)/g, ';\n$1');
         })
         .join('\n')
         .trim();
@@ -180,7 +206,7 @@ function pretty(document, range) {
     // Normalize IF and WHILE
     output = normalizeCommandStructure(output);
     // Add new line after every semicolon
-    output = output.replace(/; *([^\n]+)/g, ';\n$1');
+    output = addLineAfterSemicolon(output);
     // Remove any whitespaces before semicolon
     // and duplicates
     output = output.replace(/[\s;]*;/g, ';');
