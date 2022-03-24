@@ -62,8 +62,7 @@ function setIndents(text) {
                 prefix = makePrefix(level - 1);
             }
 
-            var commentLine = prefix + line.replace("\t", "");
-
+            var commentLine = prefix + line.replace(/\t/g, "");
             if (line.split("//").length > 1) {
                 return commentLine;
             }

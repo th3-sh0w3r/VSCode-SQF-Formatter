@@ -1,3 +1,6 @@
+# Version 1.3.3
+- Fixed indented comment indent
+
 # Version 1.3.2
 - Fixed exitWith structure replacement
 - Fixed comment indent
