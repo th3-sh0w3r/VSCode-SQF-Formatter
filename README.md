@@ -2,7 +2,7 @@
 This extension is based on Smith's [extension](https://marketplace.visualstudio.com/items?itemName=Smith.sqf-formatter)
 
 ## What does it do?
-- It formats & prettifies your SQF code based on ACE 3 [coding guidelines](https://ace3mod.com/wiki/development/coding-guidelines.html)
+- It formats & prettifies your SQF code based on ACE 3 [coding guidelines](https://ace3.acemod.org/wiki/development/coding-guidelines.html)
 
 ## How to use
 - Press `Shift + Alt + F` to format code in editor
